@@ -21,7 +21,7 @@ const IntroductionSection = () => {
 
         <Link
           to="/map"
-          className="hover:bg-gray-100 border px-4 py-2 rounded inline-block transition"
+          className="hover:bg-gray-100 border px-4 py-2 rounded inline-block transition !no-underline"
         >
           Види на мапа
         </Link>

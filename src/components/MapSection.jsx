@@ -67,15 +67,29 @@ export default function MapSection() {
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            {
+              headers: {
+                Accept: "application/json",
+              },
+            },
           );
 
+          if (!res.ok) {
+            throw new Error("Address request failed");
+          }
+
           const data = await res.json();
-          setAddress(data.display_name);
+
+          setAddress(
+            data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+          );
         } catch (err) {
           console.log("Address fetch error:", err);
+          setAddress(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
         }
       },
-      () => {
+      (error) => {
+        console.log("Location error:", error);
         setLocationStatus("denied");
       },
     );
@@ -114,16 +128,18 @@ export default function MapSection() {
             <MapPin className="w-4 h-4 text-blue-600" />
           </div>
 
-          <div>
-            <p className="text-xs font-semibold">Тековна локација</p>
+          <div className="flex flex-col gap-0">
+            <p className="!text-xs !font-semibold !m-0">Тековна локација</p>
 
-            <p className="text-xs text-gray-500">
+            <p className="!text-xs !text-gray-500 !m-0">
               {locationStatus === "loading" && "Се вчитува..."}
+
               {locationStatus === "denied" && "Нема дозволена локација"}
+
               {locationStatus === "granted" &&
                 (address
                   ? address.split(",").slice(0, 2).join(", ")
-                  : "Твојата локација")}
+                  : "Се вчитува адреса...")}
             </p>
           </div>
         </div>

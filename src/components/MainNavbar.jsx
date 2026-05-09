@@ -1,49 +1,47 @@
 import logo from "../assets/logo.png";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const MainNavbar = () => {
-  const location = useLocation();
-
-  const isActive = (path) =>
-    location.pathname === path
-      ? "text-[#0a96f4] font-semibold"
-      : "text-gray-700 hover:text-[#0a96f4]";
+  const navClass = ({ isActive }) =>
+    isActive
+      ? "!text-[#0a96f4] font-semibold transition !no-underline"
+      : "!text-gray-700 hover:!text-[#0a96f4] transition !no-underline";
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-[#f5f9ff] border-b-2 border-blue-200 shadow">
       <div className="flex items-center gap-8">
-        <Link to="/" className="flex items-center gap-2">
+        <NavLink to="/" end className="flex items-center gap-2 !no-underline">
           <img
             src={logo}
             alt="logo"
             className="w-10 h-10 border rounded-full object-cover"
           />
-          <h1 className="text-[#0082f8] font-bold tracking-tight">МојГрад</h1>
-        </Link>
+
+          <h1 className="!text-[#0082f8] font-bold tracking-tight !text-2xl">
+            МојГрад
+          </h1>
+        </NavLink>
 
         <div className="flex gap-6 text-sm font-medium">
-          <Link to="/" className={`transition ${isActive("/")}`}>
+          <NavLink to="/" end className={navClass}>
             Почетна
-          </Link>
+          </NavLink>
 
-          <Link to="/report" className={`transition ${isActive("/report")}`}>
+          <NavLink to="/report" className={navClass}>
             Пријави Проблем
-          </Link>
+          </NavLink>
 
-          <Link
-            to="/problems"
-            className={`transition ${isActive("/problems")}`}
-          >
+          <NavLink to="/problems" className={navClass}>
             Активни Проблеми
-          </Link>
+          </NavLink>
 
-          <Link to="/map" className={`transition ${isActive("/map")}`}>
+          <NavLink to="/map" className={navClass}>
             Мапа
-          </Link>
+          </NavLink>
 
-          <Link to="/about" className={`transition ${isActive("/about")}`}>
+          <NavLink to="/about" className={navClass}>
             За Нас
-          </Link>
+          </NavLink>
         </div>
       </div>
     </div>

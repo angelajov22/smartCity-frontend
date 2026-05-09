@@ -16,7 +16,7 @@ function CTASection() {
 
         <Link
           to="/report"
-          className="mt-8 inline-block rounded-xl bg-white px-10 py-4 font-bold text-sky-500 shadow-lg transition hover:bg-sky-50"
+          className="mt-8 inline-block rounded-xl bg-white px-10 py-4 font-bold text-sky-500 shadow-lg transition hover:bg-sky-50 !no-underline"
         >
           Пријави Веднаш
         </Link>
