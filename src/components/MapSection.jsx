@@ -15,6 +15,7 @@ const redIcon = new L.DivIcon({
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   ">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
       <path d="M12 2C8 2 5 5 5 9c0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z"/>
@@ -24,13 +25,6 @@ const redIcon = new L.DivIcon({
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 });
-
-const markers = [
-  { pos: [41.9981, 21.4254], label: "Дупка на пат — Центар" },
-  { pos: [42.0034, 21.4098], label: "Расипана улична светилка" },
-  { pos: [41.9921, 21.4322], label: "Нелегално депонирање" },
-  { pos: [42.1322, 21.7144], label: "Преполн контејнер — Куманово" },
-];
 
 function ChangeMapView({ center }) {
   const map = useMap();
@@ -50,8 +44,110 @@ export default function MapSection() {
   );
 
   const [address, setAddress] = useState("");
+  const [reports, setReports] = useState([]);
 
   const navigate = useNavigate();
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "OPEN":
+        return "Пријавено";
+
+      case "ASSIGNED":
+        return "Доделено";
+
+      case "IN_PROGRESS":
+        return "Во тек";
+
+      case "RESOLVED":
+        return "Решено";
+
+      default:
+        return status;
+    }
+  };
+
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case "OPEN":
+        return "bg-blue-100 text-[#0a96f4] border border-blue-200";
+
+      case "ASSIGNED":
+        return "bg-indigo-100 text-indigo-700 border border-indigo-200";
+
+      case "IN_PROGRESS":
+        return "bg-yellow-100 text-yellow-700 border border-yellow-200";
+
+      case "RESOLVED":
+        return "bg-green-100 text-green-700 border border-green-200";
+
+      default:
+        return "bg-gray-100 text-gray-700 border border-gray-200";
+    }
+  };
+
+  const getCategoryLabel = (category) => {
+    switch (category) {
+      case "WATER":
+        return "Водовод и канализација";
+
+      case "FIRE":
+        return "Пожар";
+
+      case "ROAD":
+        return "Оштетен пат / дупки";
+
+      case "TRAFFIC":
+        return "Сообраќај";
+
+      case "WASTE":
+        return "Отпад и хигиена";
+
+      case "ELECTRICITY":
+        return "Електрика / Осветлување";
+
+      case "PUBLIC_SAFETY":
+        return "Јавна безбедност";
+
+      case "OTHER":
+        return "Останато";
+
+      default:
+        return category;
+    }
+  };
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await fetch(
+          "https://smartcity-0e3f.onrender.com/api/reports",
+        );
+
+        if (!res.ok) {
+          throw new Error("Reports request failed");
+        }
+
+        const data = await res.json();
+
+        console.log("REPORTS:", data);
+
+        const reportsWithLocation = data.filter(
+          (report) =>
+            report.latitude !== null &&
+            report.longitude !== null &&
+            report.latitude !== undefined &&
+            report.longitude !== undefined,
+        );
+
+        setReports(reportsWithLocation);
+      } catch (error) {
+        console.log("Reports fetch error:", error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -114,9 +210,70 @@ export default function MapSection() {
             </Marker>
           )}
 
-          {markers.map((m, i) => (
-            <Marker key={i} position={m.pos} icon={redIcon}>
-              <Popup>{m.label}</Popup>
+          {reports.map((report) => (
+            <Marker
+              key={report.id}
+              position={[report.latitude, report.longitude]}
+              icon={redIcon}
+              eventHandlers={{
+                mouseover: (e) => {
+                  e.target.openPopup();
+                },
+              }}
+            >
+              <Popup className="custom-popup" closeButton={false}>
+                <div className="min-w-[220px]">
+                  <p className="font-semibold text-sm m-0">
+                    Пријава #{report.id}
+                  </p>
+
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-gray-500">
+                        Статус:
+                      </span>
+
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusStyles(report.status)}`}
+                      >
+                        {getStatusLabel(report.status)}
+                      </span>
+                    </div>
+
+                    {report.category && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold text-gray-500">
+                          Категорија:
+                        </span>
+
+                        <span className="text-[12px] font-medium text-gray-700">
+                          {getCategoryLabel(report.category)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/map?lat=${report.latitude}&lng=${report.longitude}&reportId=${report.id}`,
+                        )
+                      }
+                      className="rounded-lg bg-[#0a96f4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 transition"
+                    >
+                      Погледни на мапа
+                    </button>
+
+                    <button
+                      onClick={() => navigate(`/case/${report.id}`)}
+                      className="rounded-lg border border-gray-200 px-3 py-1.5 text-[11px] font-semibold text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Детали
+                    </button>
+                  </div>
+                </div>
+              </Popup>
             </Marker>
           ))}
         </MapContainer>
