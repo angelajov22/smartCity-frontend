@@ -30,7 +30,7 @@ export default function AdminLayout() {
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
       <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fe' }}>
 
-        {/* ===== SIDEBAR ===== */}
+
         <aside
           className="shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
           style={{
@@ -80,7 +80,7 @@ export default function AdminLayout() {
             )}
           </div>
 
-          {/* Navigation */}
+
           <nav style={{ flex: 1 }}>
             <div style={{
               display: 'flex',
@@ -142,7 +142,7 @@ export default function AdminLayout() {
             </div>
           </nav>
 
-          {/* Bottom Section: User Profile */}
+
           <div style={{ padding: collapsed ? '24px 16px' : '32px 20px', display: 'flex', flexDirection: 'column' }}>
             <div style={{
               display: 'flex',
@@ -174,7 +174,7 @@ export default function AdminLayout() {
 
         </aside>
 
-        {/* ===== MAIN CONTENT ===== */}
+
         <main
           style={{
             flex: 1,
