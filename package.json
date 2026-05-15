@@ -1,7 +1,7 @@
 {
   "name": "mojgrad",
-  "version": "0.0.0",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,8 @@
     "react-dom": "^19.2.5",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.14.2",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -30,7 +31,6 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "postcss": "^8.5.14",
-    "tailwindcss": "^4.2.4",
     "vite": "^8.0.10"
   }
 }

@@ -1,11 +1,13 @@
-import "./index.css";
-import App from "./App";
-import "leaflet/dist/leaflet.css";
-import React from "react";
-import ReactDOM from "react-dom/client";
+import React, { StrictMode } from "react";
+import ReactDOM, { createRoot } from "react-dom/client";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+import "leaflet/dist/leaflet.css";
+import "./index.css";
+
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
 );
