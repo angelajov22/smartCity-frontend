@@ -79,14 +79,11 @@ export default function AdminCases() {
   const [statusFilter, setStatusFilter] = useState("");
 
   // Fetch reports from API on mount
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
   const fetchReports = async () => {
     try {
       setLoading(true);
       setError(null);
+
       const data = await getReports();
       setCases(data);
     } catch (err) {
@@ -96,6 +93,11 @@ export default function AdminCases() {
       setLoading(false);
     }
   };
+
+  // Fetch reports from API on mount
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   // Filter Logic
   const filteredCases = cases.filter((c) => {
@@ -185,21 +187,21 @@ export default function AdminCases() {
         className="bg-white/80 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between sticky top-0 z-30 shadow-sm"
         style={{ height: 80, padding: "0 40px" }}
       >
-        <div>
-          <h5 className=" font-extrabold -ml-4 mr-4 text-center text-gray-900 leading-tight tracking-tight">
-            Администраторски преглед
-            <br />
-            <span className="text-blue-600">на пријави</span>
-          </h5>
-        </div>
+        <h5
+          className="text-[19px] font-extrabold text-gray-900 leading-tight tracking-tight"
+          style={{ width: 300 }}
+        >
+          Администраторски преглед на
+          <br />
+          <span className="text-blue-600">случаи</span>
+        </h5>
 
         <div style={{ maxWidth: 500, flex: 1 }} className="mx-auto">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-
             <input
               type="text"
-              placeholder="Пребарај проблеми, институции или ID..."
+              placeholder="Пребарај случаи по ID или наслов..."
               style={{ padding: "12px 16px 12px 44px" }}
               className="w-full bg-gray-50/50 border border-gray-200/50 rounded-2xl text-[14px] text-gray-700 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner"
               value={searchQuery}
@@ -214,10 +216,8 @@ export default function AdminCases() {
         >
           <button className="relative w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-100 hover:bg-blue-50 transition-all shadow-sm">
             <Bell className="w-5 h-5" />
-
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-
           <button
             onClick={() => {
               setEditingCase(null);
@@ -226,8 +226,8 @@ export default function AdminCases() {
             className="flex items-center gap-2 text-[13px] font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl transition-all uppercase tracking-wider shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5"
             style={{ padding: "12px 24px" }}
           >
-            <Plus className="w-4 h-4" strokeWidth={3} />
-            НОВА ПРИЈАВА
+            <Plus className="w-2 h-2" strokeWidth={3} />
+            ДОДАДИ ПРОБЛЕМ
           </button>
         </div>
       </header>

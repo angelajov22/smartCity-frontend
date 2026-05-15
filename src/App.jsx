@@ -10,35 +10,47 @@ import InstitutionsPage from "./pages/admin/InstitutionsPage";
 import AddInstitutionPage from "./pages/admin/AddInstitutionPage";
 import UsersPage from "./pages/admin/UsersPage";
 import SettingsPage from "./pages/admin/SettingsPage";
+import LoginPage from "./pages/admin/LoginPage";
+import ProtectedRoute from "./pages/admin/ProtectedRoute";
 
 import AdminCases from "./pages/AdminCases";
 
 import { AppProvider } from "./context/AppContext";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/map" element={<ProblemsMap />} />
-          <Route path="/case/:id" element={<CaseDetailPage />} />
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/map" element={<ProblemsMap />} />
+            <Route path="/case/:id" element={<CaseDetailPage />} />
 
-          {/* Admin */}
-          <Route path="/admin" element={<DashboardLayout />}>
-            <Route index element={<DashboardHomePage />} />
-            <Route path="cases" element={<AdminCases />} />
-            <Route path="institutions" element={<InstitutionsPage />} />
-            <Route path="institutions/add" element={<AddInstitutionPage />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+            {/* Login */}
+            <Route path="/admin/login" element={<LoginPage />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Admin protected */}
+            <Route path="/admin" element={<DashboardLayout />}>
+              <Route element={<ProtectedRoute />}>
+                <Route index element={<DashboardHomePage />} />
+                <Route path="cases" element={<AdminCases />} />
+                <Route path="institutions" element={<InstitutionsPage />} />
+                <Route
+                  path="institutions/add"
+                  element={<AddInstitutionPage />}
+                />
+                <Route path="users" element={<UsersPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </AppProvider>
   );
 }
