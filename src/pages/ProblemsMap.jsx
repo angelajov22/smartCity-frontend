@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import MainNavbar from "../components/MainNavbar";
 
 
 import {
@@ -275,7 +274,6 @@ export default function ProblemsMap() {
 
   return (
     <div className="flex flex-col flex-1">
-      {/*<MainNavbar />*/}
       {/* Search */}
 
       <div className="bg-white border-b border-gray-100 px-6 py-3">
@@ -385,11 +383,17 @@ export default function ProblemsMap() {
                     </div>
                   )}
 
-                  <div className="mt-3">
+                  <div className="mt-3 flex items-center justify-between">
                     <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-[#e8f4fe] text-[#0a96f4]">
                       {statusMap[report.status]
                         ?.label || report.status}
                     </span>
+                    <a
+                      href={`/case/${report.id}`}
+                      className="text-xs font-semibold text-[#0a96f4] hover:underline"
+                    >
+                      Детали →
+                    </a>
                   </div>
                 </div>
               </Popup>
