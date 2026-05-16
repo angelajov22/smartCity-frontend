@@ -1,127 +1,130 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CATEGORIES } from "../context/AppContext";
 
-import ReportNavbar from "../components/MainNavbar";
+import MainNavbar from "../components/MainNavbar";
 import ReportCategorySelector from "../components/ReportCategorySelector";
 import ReportDetails from "../components/ReportDetails";
 import ReportUpload from "../components/ReportUpload";
 import ReportMap from "../components/ReportMap";
 
-function getInstitutionByCategory(category) {
-  switch (category) {
-    case "Јавно осветлување":
-      return "ЕВН Македонија";
-
-    case "Оштетен пат / Дупки":
-      return "ЈП Улици и Патишта";
-
-    case "Отпад и хигиена":
-      return "Комунална хигиена";
-
-    case "Водовод и канализација":
-      return "ЈП Водовод и Канализација";
-
-    case "Паркови и зеленило":
-      return "Паркови и зеленило";
-
-    default:
-      return "Општина Центар";
-  }
-}
+import { getCategories, createReport, categoryMap } from "../api/apiService";
 
 function ReportForm() {
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [position, setPosition] = useState({ lat: 41.9981, lng: 21.4254 });
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
-  function handleSubmit() {
+  // Fetch categories from backend on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const data = await getCategories();
+        // data is an array of backend enum strings e.g. ["WATER", "ROAD", ...]
+        // Map them to { icon, name } shape that ReportCategorySelector expects
+        const iconMap = {
+          WATER: "🚰",
+          FIRE: "🔥",
+          ROAD: "🛣️",
+          TRAFFIC: "🚦",
+          WASTE: "🗑️",
+          ELECTRICITY: "⚡",
+          PUBLIC_SAFETY: "🛡️",
+          OTHER: "❓",
+        };
+        const mapped = data.map((key) => ({
+          key, // backend enum value we'll send on submit
+          icon: iconMap[key] || "❓",
+          name: categoryMap[key]?.label || key,
+        }));
+        setCategories(mapped);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  async function handleSubmit() {
     if (!selectedCategory || !description.trim()) {
       alert("Ве молиме изберете категорија и внесете опис.");
       return;
     }
 
-    const savedCases = JSON.parse(localStorage.getItem("cases")) || [];
+    setSubmitting(true);
+    try {
+      await createReport({
+        description,
+        category: selectedCategory, // backend enum key e.g. "WATER"
+        latitude: position.lat,
+        longitude: position.lng,
+        image: selectedFile || undefined,
+      });
 
-    const nextIdNumber = String(savedCases.length + 1).padStart(3, "0");
-    const currentYear = new Date().getFullYear();
-
-    const newCase = {
-      id: `${currentYear}-${nextIdNumber}`,
-      title:
-          description.length > 55
-              ? description.slice(0, 55) + "..."
-              : description,
-      category: selectedCategory,
-      date: new Date().toISOString().split("T")[0],
-      municipality: "Центар",
-      institution: getInstitutionByCategory(selectedCategory),
-      status: "Пријавено",
-      imageName: selectedFile ? selectedFile.name : "",
-    };
-
-    const updatedCases = [...savedCases, newCase];
-
-    localStorage.setItem("cases", JSON.stringify(updatedCases));
-
-    alert("Пријавата е успешно испратена.");
-
-    setSelectedCategory("");
-    setDescription("");
-    setSelectedFile(null);
-
-    navigate("/problems");
+      alert("Пријавата е успешно испратена.");
+      setSelectedCategory("");
+      setDescription("");
+      setSelectedFile(null);
+      navigate("/problems");
+    } catch (err) {
+      alert("Грешка при испраќање: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-      <div className="min-h-screen bg-white">
-        <ReportNavbar />
+    <div className="min-h-screen bg-white">
+      <MainNavbar />
 
-        <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr]">
-          <section className="px-12 py-12 max-w-3xl mx-auto w-full">
-            <h1 className="!text-4xl !font-bold !text-gray-900">
-              Пријави нов проблем
-            </h1>
+      <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr]">
+        <section className="px-12 py-12 max-w-3xl mx-auto w-full">
+          <h1 className="!text-4xl !font-bold !text-gray-900">
+            Пријави нов проблем
+          </h1>
 
-            <p className="!text-gray-600 !mt-4 !text-lg !leading-relaxed">
-              Вашата пријава директно помага за подобра и пофункционална
-              заедница. Ве молиме пополнете ги задолжителните полиња.
-            </p>
+          <p className="!text-gray-600 !mt-4 !text-lg !leading-relaxed">
+            Вашата пријава директно помага за подобра и пофункционална
+            заедница. Ве молиме пополнете ги задолжителните полиња.
+          </p>
 
-            <ReportCategorySelector
-                categories={CATEGORIES}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-            />
+          <ReportCategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
 
-            <ReportDetails
-                description={description}
-                setDescription={setDescription}
-            />
+          <ReportDetails
+            description={description}
+            setDescription={setDescription}
+          />
 
-            <ReportUpload
-                selectedFile={selectedFile}
-                setSelectedFile={setSelectedFile}
-            />
+          <ReportUpload
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+          />
 
-            <div className="!mt-12 !border !rounded-2xl !px-6 !py-5 !font-semibold !text-gray-700">
-              ⓘ Со кликнување на „Испрати пријава“, потврдувате дека наведените
-              податоци се точни и локацијата на мапата е правилно означена.
-            </div>
+          <div className="!mt-12 !border !rounded-2xl !px-6 !py-5 !font-semibold !text-gray-700">
+            ⓘ Со кликнување на „Испрати пријава", потврдувате дека наведените
+            податоци се точни и локацијата на мапата е правилно означена.
+          </div>
 
-            <button
-                onClick={handleSubmit}
-                className="!mt-8 !w-full !bg-orange-500 !text-white !font-bold !text-xl !py-5 !rounded-2xl shadow-lg hover:!bg-orange-600 !transition"
-            >
-              Испрати пријава
-            </button>
-          </section>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="!mt-8 !w-full !bg-orange-500 !text-white !font-bold !text-xl !py-5 !rounded-2xl shadow-lg hover:!bg-orange-600 !transition disabled:opacity-50"
+          >
+            {submitting ? "Се испраќа..." : "Испрати пријава"}
+          </button>
+        </section>
 
-          <ReportMap />
-        </main>
-      </div>
+        <ReportMap position={position} setPosition={setPosition} />
+      </main>
+    </div>
   );
 }
 
