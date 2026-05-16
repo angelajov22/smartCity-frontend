@@ -99,6 +99,11 @@ export default function AdminCases() {
     fetchReports();
   }, []);
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, categoryFilter, statusFilter]);
+
   // Filter Logic
   const filteredCases = cases.filter((c) => {
     const desc = (c.description || "").toLowerCase();
@@ -110,7 +115,11 @@ export default function AdminCases() {
       inst.includes(searchQuery.toLowerCase());
     const matchesCategory =
       categoryFilter === "" || c.category === categoryFilter;
-    const matchesStatus = statusFilter === "" || c.status === statusFilter;
+
+    // Handle OPEN and ASSIGNED as the same status "Нов" in the UI
+    const matchesStatus = statusFilter === "" ||
+      c.status === statusFilter ||
+      (statusFilter === "OPEN" && c.status === "ASSIGNED");
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -151,9 +160,20 @@ export default function AdminCases() {
         if (formData.status && formData.status !== editingCase.status) {
           await updateReportStatus(editingCase.id, formData.status);
         }
-        // Refetch to get the latest state
-        const refreshed = await getReports();
-        setCases(refreshed);
+
+        // Optimistically update the UI to show the new data immediately
+        setCases((prev) =>
+          prev.map((c) =>
+            c.id === editingCase.id
+              ? {
+                ...c,
+                description: formData.description,
+                category: formData.category,
+                status: formData.status,
+              }
+              : c
+          )
+        );
       } else {
         const created = await createReport({
           description: formData.description,
@@ -396,11 +416,9 @@ export default function AdminCases() {
                       }}
                     >
                       <option value="">Сите статуси</option>
-                      {Object.entries(statusMap).map(([key, val]) => (
-                        <option key={key} value={key}>
-                          {val.label}
-                        </option>
-                      ))}
+                      <option value="OPEN">Нов</option>
+                      <option value="IN_PROGRESS">Во тек</option>
+                      <option value="RESOLVED">Решен</option>
                     </select>
 
                     <button
@@ -635,13 +653,12 @@ export default function AdminCases() {
                               typeof page === "number" && setCurrentPage(page)
                             }
                             disabled={page === "..."}
-                            className={`text-[13px] font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                              page === currentPage
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
-                                : page === "..."
-                                  ? "text-gray-400 cursor-default"
-                                  : "text-gray-500 hover:bg-gray-100"
-                            }`}
+                            className={`text-[13px] font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all ${page === currentPage
+                              ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
+                              : page === "..."
+                                ? "text-gray-400 cursor-default"
+                                : "text-gray-500 hover:bg-gray-100"
+                              }`}
                           >
                             {page}
                           </button>
@@ -951,14 +968,12 @@ export default function AdminCases() {
                   </label>
                   <select
                     name="status"
-                    defaultValue={editingCase?.status || "OPEN"}
+                    defaultValue={(editingCase?.status === 'ASSIGNED' ? 'OPEN' : editingCase?.status) || "OPEN"}
                     className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-[14px] text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all appearance-none"
                   >
-                    {Object.entries(statusMap).map(([key, val]) => (
-                      <option key={key} value={key}>
-                        {val.label}
-                      </option>
-                    ))}
+                    <option value="OPEN">Нов</option>
+                    <option value="IN_PROGRESS">Во тек</option>
+                    <option value="RESOLVED">Решен</option>
                   </select>
                 </div>
               </div>

@@ -7,15 +7,12 @@ export default function PublicLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Header */}
       <MainNavbar />
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col">
         <Outlet />
       </main>
 
-      {/* Footer */}
       <footer className="bg-white border-t border-gray-100 py-5">
         <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
