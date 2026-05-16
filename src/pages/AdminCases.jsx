@@ -200,6 +200,34 @@ export default function AdminCases() {
     setCurrentPage(1);
   };
 
+  const exportToCSV = () => {
+    if (filteredCases.length === 0) {
+      alert("Нема податоци за извоз.");
+      return;
+    }
+
+    const headers = ["ID", "Опис", "Категорија", "Институција", "Статус", "Координати"];
+    const rows = filteredCases.map((c) => [
+      c.id,
+      `"${(c.description || "").replace(/"/g, '""')}"`,
+      getDisplayCategory(c.category),
+      `"${(c.institutionName || "").replace(/"/g, '""')}"`,
+      getDisplayStatus(c.status),
+      `"${c.latitude?.toFixed(4) || ""}, ${c.longitude?.toFixed(4) || ""}"`,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    // Add BOM for Excel UTF-8 compatibility
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `mojgrad_slucaevi_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f4f7fe] font-sans relative">
       {/* ===== TOP HEADER BAR ===== */}
@@ -374,6 +402,7 @@ export default function AdminCases() {
                       />
                     </button>
                     <button
+                      onClick={exportToCSV}
                       className="text-[14px] font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                       style={{ padding: "10px 20px" }}
                     >
