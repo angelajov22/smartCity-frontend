@@ -7,13 +7,12 @@ const AddInstitutionPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
-    address: "",
+    category: "OTHER",
     description: "",
     apiUrl: "",
-    apiKey: "",
-    tags: "",
   });
 
   const handleSubmit = async (e) => {
@@ -24,18 +23,15 @@ const AddInstitutionPage = () => {
     try {
       const payload = {
         name: formData.name,
-        address: formData.address,
+        category: formData.category,
         description: formData.description,
-        apiUrl: formData.apiUrl,
-        apiKey: formData.apiKey,
-        tags: formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag),
-        status: "Во обработка",
+        url: formData.apiUrl,
       };
 
       await institutionApi.create(payload);
       navigate("/admin/institutions");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Настана грешка");
     } finally {
       setLoading(false);
     }
@@ -58,7 +54,11 @@ const AddInstitutionPage = () => {
           <ArrowLeft size={16} />
           Назад кон листата
         </Link>
-        <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Додај институција</h1>
+
+        <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+          Додај институција
+        </h1>
+
         <p className="text-gray-500 mt-1.5 text-sm font-normal">
           Додавање на нова институција во системот
         </p>
@@ -70,7 +70,12 @@ const AddInstitutionPage = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)" }}>
+      <div
+        className="bg-white rounded-2xl"
+        style={{
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)",
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <div className="p-8">
             <div className="grid grid-cols-2 gap-6">
@@ -78,6 +83,7 @@ const AddInstitutionPage = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2.5">
                   Име на институција *
                 </label>
+
                 <input
                   type="text"
                   name="name"
@@ -92,24 +98,33 @@ const AddInstitutionPage = () => {
 
               <div className="col-span-2 md:col-span-1">
                 <label className="block text-sm font-semibold text-gray-700 mb-2.5">
-                  Адреса *
+                  Категорија *
                 </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
+
+                <select
+                  name="category"
+                  value={formData.category}
                   onChange={handleChange}
                   required
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 focus:border-[#0a96f4] focus:ring-2 focus:ring-blue-100 focus:ring-offset-1 outline-none bg-gray-50/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Внесете адреса"
-                />
+                >
+                  <option value="FIRE">Пожар</option>
+                  <option value="WATER">Водовод</option>
+                  <option value="ELECTRICITY">Електрика</option>
+                  <option value="ROAD">Оштетен пат / дупки</option>
+                  <option value="WASTE">Отпад и хигиена</option>
+                  <option value="PUBLIC_SAFETY">Јавна безбедност</option>
+                  <option value="TRAFFIC">Сообраќај</option>
+                  <option value="OTHER">Останато</option>
+                </select>
               </div>
 
               <div className="col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2.5">
                   Опис
                 </label>
+
                 <textarea
                   name="description"
                   value={formData.description}
@@ -121,10 +136,11 @@ const AddInstitutionPage = () => {
                 />
               </div>
 
-              <div className="col-span-2 md:col-span-1">
+              <div className="col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2.5">
-                  API URL
+                  URL
                 </label>
+
                 <input
                   type="url"
                   name="apiUrl"
@@ -132,41 +148,8 @@ const AddInstitutionPage = () => {
                   onChange={handleChange}
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 focus:border-[#0a96f4] focus:ring-2 focus:ring-blue-100 focus:ring-offset-1 outline-none bg-gray-50/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="https://api.example.com"
+                  placeholder="https://example.com"
                 />
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-semibold text-gray-700 mb-2.5">
-                  API Key
-                </label>
-                <input
-                  type="text"
-                  name="apiKey"
-                  value={formData.apiKey}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 focus:border-[#0a96f4] focus:ring-2 focus:ring-blue-100 focus:ring-offset-1 outline-none bg-gray-50/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Внесете API клуч"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2.5">
-                  Tags (keywords)
-                </label>
-                <input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 focus:border-[#0a96f4] focus:ring-2 focus:ring-blue-100 focus:ring-offset-1 outline-none bg-gray-50/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Внесете ги клучните зборови одделени со запирка"
-                />
-                <p className="text-xs text-gray-400 mt-2 font-medium">
-                  Одделете ги таговите со запирка (пр: образование, училиште, Скопје)
-                </p>
               </div>
             </div>
           </div>
@@ -176,9 +159,9 @@ const AddInstitutionPage = () => {
               type="submit"
               disabled={loading}
               className="flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-              style={{ 
+              style={{
                 backgroundColor: "#0a96f4",
-                boxShadow: "0 4px 12px rgba(10, 150, 244, 0.25)"
+                boxShadow: "0 4px 12px rgba(10, 150, 244, 0.25)",
               }}
             >
               {loading ? (

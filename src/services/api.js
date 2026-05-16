@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://smartcity-0e3f.onrender.com/api";
 
 const api = {
   async get(endpoint) {
@@ -8,9 +9,11 @@ const api = {
         "Content-Type": "application/json",
       },
     });
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
+
     return response.json();
   },
 
@@ -22,9 +25,11 @@ const api = {
       },
       body: JSON.stringify(data),
     });
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
+
     return response.json();
   },
 
@@ -36,9 +41,11 @@ const api = {
       },
       body: JSON.stringify(data),
     });
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
+
     return response.json();
   },
 
@@ -49,10 +56,19 @@ const api = {
         "Content-Type": "application/json",
       },
     });
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
-    return response.json();
+
+    // DELETE често враќа празен response
+    if (response.status === 204) {
+      return null;
+    }
+
+    const text = await response.text();
+
+    return text ? JSON.parse(text) : null;
   },
 };
 
