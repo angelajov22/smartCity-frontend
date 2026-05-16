@@ -80,4 +80,12 @@ export const institutionApi = {
   delete: (id) => api.delete(`/institutions/${id}`),
 };
 
+export const reportApi = {
+  getAll: () => api.get("/reports"),
+  getById: (id) => api.get(`/reports/${id}`),
+  create: (data) => api.post("/reports", data),
+  update: (id, data) => api.put(`/reports/${id}`, data),
+  delete: (id) => api.delete(`/reports/${id}`),
+};
+
 export default api;

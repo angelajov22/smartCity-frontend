@@ -1,6 +1,45 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { reportApi } from "../services/api";
 
 const IntroductionSection = () => {
+  const [stats, setStats] = useState({
+    resolved: 0,
+    active: 0,
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const reports = await reportApi.getAll();
+
+        const reportsArray = Array.isArray(reports)
+          ? reports
+          : reports.content || reports.data || [];
+
+        const resolvedCount = reportsArray.filter(
+          (report) => report.status === "RESOLVED",
+        ).length;
+
+        const activeCount = reportsArray.filter(
+          (report) =>
+            report.status === "OPEN" ||
+            report.status === "ASSIGNED" ||
+            report.status === "IN_PROGRESS",
+        ).length;
+
+        setStats({
+          resolved: resolvedCount,
+          active: activeCount,
+        });
+      } catch (error) {
+        console.error("Failed to load report stats:", error);
+      }
+    };
+
+    loadStats();
+  }, []);
+
   return (
     <div className="max-w-lg">
       <h1 className="text-4xl font-bold">
@@ -29,7 +68,7 @@ const IntroductionSection = () => {
 
       <div className="mt-6 grid grid-cols-2 gap-4 max-w-md">
         <div
-          className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm 
+          className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm
                   transition duration-200 transform hover:scale-105 hover:shadow-lg"
         >
           <div className="flex items-center gap-2 text-sm font-semibold text-sky-500">
@@ -39,11 +78,13 @@ const IntroductionSection = () => {
             Решени
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-gray-900">1,248</p>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {stats.resolved}
+          </p>
         </div>
 
         <div
-          className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm 
+          className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm
                   transition duration-200 transform hover:scale-105 hover:shadow-lg"
         >
           <div className="flex items-center gap-2 text-sm font-semibold text-orange-400">
@@ -53,7 +94,9 @@ const IntroductionSection = () => {
             Активни
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-gray-900">342</p>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {stats.active}
+          </p>
         </div>
       </div>
     </div>
