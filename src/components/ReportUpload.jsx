@@ -1,14 +1,14 @@
 function ReportUpload({ selectedFile, setSelectedFile }) {
   function handleFileChange(event) {
-    const file = event.target.files[0]
-    setSelectedFile(file)
+    const file = event.target.files[0];
+    if (file) setSelectedFile(file);
   }
 
   return (
-    <section className="mt-10">
+    <section className="!mt-10">
       <h2 className="!text-xl !font-bold !mb-5">3. Фотографија</h2>
 
-      <label className="!block !border-2 !border-dashed !border-gray-200 !rounded-2xl !py-16 !px-6 !text-center cursor-pointer hover:!bg-gray-50">
+      <div className="!border-2 !border-dashed !border-gray-200 !rounded-2xl !py-10 sm:!py-16 !px-5 sm:!px-6 !text-center hover:!bg-gray-50">
         <div className="!w-16 !h-16 !mx-auto !rounded-full !bg-gray-100 !flex !items-center !justify-center !text-3xl !mb-5">
           📷
         </div>
@@ -17,29 +17,41 @@ function ReportUpload({ selectedFile, setSelectedFile }) {
           Прикачи фотографија од проблемот
         </h3>
 
-        <p className="text-gray-500 mt-2">
+        <p className="!text-gray-500 !mt-2">
           Дозволени формати: JPG, PNG (макс. 10MB)
         </p>
 
-        <div className="mt-6 inline-block border border-gray-200 rounded-xl px-6 py-3 font-semibold">
-          ⬆ Избери датотека
+        <div className="!mt-6 !flex !flex-col sm:!flex-row !gap-3 !justify-center">
+          <label className="!inline-block !border !border-gray-200 !rounded-xl !px-6 !py-3 !font-semibold cursor-pointer hover:!bg-white">
+            ⬆ Избери датотека
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+
+          <label className="!inline-block !border !border-gray-200 !rounded-xl !px-6 !py-3 !font-semibold cursor-pointer hover:!bg-white">
+            📸 Фотографирај
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
+              capture="environment"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
         </div>
 
-        <input
-          type="file"
-          accept="image/png, image/jpeg"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-
         {selectedFile && (
-          <p className="mt-4 text-blue-500 font-semibold">
+          <p className="!mt-4 !text-blue-500 !font-semibold !break-words">
             Избрана слика: {selectedFile.name}
           </p>
         )}
-      </label>
+      </div>
     </section>
-  )
+  );
 }
 
-export default ReportUpload
+export default ReportUpload;

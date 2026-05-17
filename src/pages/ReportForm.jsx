@@ -82,12 +82,12 @@ function ReportForm() {
       <MainNavbar />
 
       <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr]">
-        <section className="px-12 py-12 max-w-3xl mx-auto w-full">
-          <h1 className="!text-4xl !font-bold !text-gray-900">
+        <section className="!px-5 sm:!px-8 lg:!px-12 !py-8 lg:!py-12 max-w-3xl mx-auto w-full">
+          <h1 className="!text-3xl sm:!text-4xl !font-bold !text-gray-900">
             Пријави нов проблем
           </h1>
 
-          <p className="!text-gray-600 !mt-4 !text-lg !leading-relaxed">
+          <p className="!text-gray-600 !mt-4 !text-base sm:!text-lg !leading-relaxed">
             Вашата пријава директно помага за подобра и пофункционална
             заедница. Ве молиме пополнете ги задолжителните полиња.
           </p>
