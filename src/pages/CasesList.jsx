@@ -1,57 +1,69 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { initialCases } from "../data/initialCases";
+import { getReports, categoryMap, statusMap } from "../api/apiService";
 import MainNavbar from "../components/MainNavbar";
 import MainFooter from "../components/MainFooter";
 
 function CasesList() {
   const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [municipalityFilter, setMunicipalityFilter] = useState("Сите општини");
   const [categoryFilter, setCategoryFilter] = useState("Сите категории");
   const [statusFilter, setStatusFilter] = useState("Сите статуси");
 
   useEffect(() => {
-    const savedCases = localStorage.getItem("cases");
-
-    if (savedCases) {
-      setCases(JSON.parse(savedCases));
-    } else {
-      setCases(initialCases);
-      localStorage.setItem("cases", JSON.stringify(initialCases));
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const data = await getReports();
+        // Sort descending by ID or date so newest are first
+        const sortedData = data.sort((a, b) => b.id - a.id);
+        setCases(sortedData);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      } finally {
+        setLoading(false);
+      }
     }
+    fetchData();
   }, []);
 
   const filteredCases = cases.filter((item) => {
     const search = searchTerm.toLowerCase();
 
-    const matchesSearch =
-      item.title.toLowerCase().includes(search) ||
-      item.institution.toLowerCase().includes(search) ||
-      item.category.toLowerCase().includes(search) ||
-      item.municipality.toLowerCase().includes(search);
+    const desc = item.description ? item.description.toLowerCase() : "";
+    const inst = item.institutionName ? item.institutionName.toLowerCase() : "";
+    
+    const catLabel = categoryMap[item.category]?.label || item.category;
+    const statLabel = statusMap[item.status]?.label || item.status;
 
-    const matchesMunicipality =
-      municipalityFilter === "Сите општини" ||
-      item.municipality === municipalityFilter;
+    const matchesSearch =
+      desc.includes(search) ||
+      inst.includes(search) ||
+      (catLabel && catLabel.toLowerCase().includes(search));
 
     const matchesCategory =
-      categoryFilter === "Сите категории" || item.category === categoryFilter;
+      categoryFilter === "Сите категории" || catLabel === categoryFilter;
 
+    // Treat OPEN and ASSIGNED as "Нов" based on statusMap
+    let currentStatusLabel = statLabel;
+    if (item.status === "OPEN" || item.status === "ASSIGNED") {
+      currentStatusLabel = "Нов";
+    }
+    
     const matchesStatus =
-      statusFilter === "Сите статуси" || item.status === statusFilter;
+      statusFilter === "Сите статуси" || currentStatusLabel === statusFilter;
 
-    return matchesSearch && matchesMunicipality && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const totalCases = cases.length;
-  const activeCases = cases.filter((item) => item.status === "Во тек").length;
-  const solvedCases = cases.filter((item) => item.status === "Решено").length;
+  const activeCases = cases.filter((item) => item.status === "IN_PROGRESS" || item.status === "OPEN" || item.status === "ASSIGNED").length;
+  const solvedCases = cases.filter((item) => item.status === "RESOLVED").length;
 
   function clearFilters() {
     setSearchTerm("");
-    setMunicipalityFilter("Сите општини");
     setCategoryFilter("Сите категории");
     setStatusFilter("Сите статуси");
   }
@@ -118,20 +130,8 @@ function CasesList() {
           </div>
         </section>
 
-        <section className="!bg-white !rounded-2xl !p-5 !mb-8 !flex !gap-4 !items-center">
+        <section className="!bg-white !rounded-2xl !p-5 !mb-8 !flex !gap-4 !items-center !flex-wrap">
           <span className="!font-semibold">Филтрирај според:</span>
-
-          <select
-            value={municipalityFilter}
-            onChange={(event) => setMunicipalityFilter(event.target.value)}
-            className="!border !rounded-xl !px-4 !py-2"
-          >
-            <option>Сите општини</option>
-            <option>Центар</option>
-            <option>Карпош</option>
-            <option>Аеродром</option>
-            <option>Кисела Вода</option>
-          </select>
 
           <select
             value={categoryFilter}
@@ -139,12 +139,9 @@ function CasesList() {
             className="!border !rounded-xl !px-4 !py-2"
           >
             <option>Сите категории</option>
-            <option>Оштетен пат / Дупки</option>
-            <option>Отпад и хигиена</option>
-            <option>Јавно осветлување</option>
-            <option>Водовод и канализација</option>
-            <option>Паркови и зеленило</option>
-            <option>Останато</option>
+            {Object.values(categoryMap).map((cat, index) => (
+              <option key={index} value={cat.label}>{cat.label}</option>
+            ))}
           </select>
 
           <select
@@ -153,15 +150,15 @@ function CasesList() {
             className="!border !rounded-xl !px-4 !py-2"
           >
             <option>Сите статуси</option>
-            <option>Пријавено</option>
-            <option>Во тек</option>
-            <option>Решено</option>
+            <option value="Нов">Нов (Пријавено)</option>
+            <option value="Во тек">Во тек</option>
+            <option value="Решен">Решен</option>
           </select>
 
           <button
             type="button"
             onClick={clearFilters}
-            className="!text-gray-500 !font-semibold !bg-transparent !border-0"
+            className="!text-gray-500 !font-semibold !bg-transparent !border-0 hover:!text-red-500 transition-colors"
           >
             Исчисти
           </button>
@@ -176,47 +173,65 @@ function CasesList() {
             <thead className="!bg-gray-50 !text-gray-500 !text-sm">
               <tr>
                 <th className="!px-6 !py-4">ID Број</th>
-                <th className="!px-6 !py-4">Наслов на пријава</th>
+                <th className="!px-6 !py-4">Опис на пријава</th>
                 <th className="!px-6 !py-4">Датум</th>
-                <th className="!px-6 !py-4">Општина</th>
                 <th className="!px-6 !py-4">Надлежна институција</th>
                 <th className="!px-6 !py-4">Статус</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredCases.map((item) => (
-                <tr key={item.id} className="!border-t hover:!bg-gray-50">
-                  <td className="!px-6 !py-5 !font-semibold !text-gray-600">#{item.id}</td>
-                  <td className="!px-6 !py-5">
-                    <p className="!font-bold">{item.title}</p>
-                    <p className="!text-sm !text-gray-500">{item.category}</p>
-                  </td>
-                  <td className="!px-6 !py-5">{item.date}</td>
-                  <td className="!px-6 !py-5">{item.municipality}</td>
-                  <td className="!px-6 !py-5">{item.institution}</td>
-                  <td className="!px-6 !py-5">
-                    <span
-                      className={`!px-3 !py-1 !rounded-full !text-sm !font-bold ${
-                        item.status === "Решено"
-                          ? "!bg-green-100 !text-green-600"
-                          : item.status === "Во тек"
-                          ? "!bg-yellow-100 !text-yellow-700"
-                          : "!bg-blue-100 !text-blue-600"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="!text-center !py-10 !text-gray-500">
+                    Се вчитуваат пријавите...
                   </td>
                 </tr>
-              ))}
-
-              {filteredCases.length === 0 && (
+              ) : filteredCases.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="!text-center !py-10 !text-gray-500">
+                  <td colSpan="5" className="!text-center !py-10 !text-gray-500">
                     Нема пронајдени случаи.
                   </td>
                 </tr>
+              ) : (
+                filteredCases.map((item) => {
+                  const displayCat = categoryMap[item.category]?.label || item.category;
+                  let displayStatus = statusMap[item.status]?.label || item.status;
+                  if (item.status === "OPEN" || item.status === "ASSIGNED") {
+                    displayStatus = "Нов";
+                  }
+
+                  return (
+                    <tr key={item.id} className="!border-t hover:!bg-gray-50 transition-colors">
+                      <td className="!px-6 !py-5 !font-semibold !text-gray-600">
+                        <Link to={`/case/${item.id}`} className="!text-blue-600 hover:!underline">
+                          #{item.id}
+                        </Link>
+                      </td>
+                      <td className="!px-6 !py-5 !max-w-md">
+                        <p className="!font-bold !truncate">{item.description}</p>
+                        <p className="!text-sm !text-gray-500">{displayCat}</p>
+                      </td>
+                      <td className="!px-6 !py-5 whitespace-nowrap">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('mk-MK') : "—"}
+                      </td>
+                      <td className="!px-6 !py-5">{item.institutionName || "—"}</td>
+                      <td className="!px-6 !py-5">
+                        <span
+                          className={`!px-3 !py-1 !rounded-full !text-sm !font-bold ${
+                            item.status === "RESOLVED"
+                              ? "!bg-green-100 !text-green-600"
+                              : item.status === "IN_PROGRESS"
+                              ? "!bg-blue-100 !text-blue-600"
+                              : "!bg-orange-100 !text-orange-600"
+                          }`}
+                        >
+                          {displayStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

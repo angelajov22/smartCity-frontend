@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import MainNavbar from "../components/MainNavbar";
 
 
 import {
@@ -252,10 +253,11 @@ export default function ProblemsMap() {
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <MainNavbar />
       {/* Search */}
 
-      <div className="bg-white border-b border-gray-100 px-6 py-3">
+      <div className="bg-white border-b border-gray-100 px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-4">
           <div className="relative w-[300px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -297,7 +299,7 @@ export default function ProblemsMap() {
 
       {/* MAP */}
 
-      <div className="relative h-[calc(100vh-72px)] w-full">
+      <div className="relative flex-1 w-full">
         {" "}
         {loading && (
           <div className="absolute inset-0 z-[1001] bg-white/80 flex items-center justify-center">
