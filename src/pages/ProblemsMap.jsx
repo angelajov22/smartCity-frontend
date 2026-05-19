@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import MainNavbar from "../components/MainNavbar";
 
-
 import {
   Search,
   Droplets,
@@ -257,11 +256,11 @@ export default function ProblemsMap() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <MainNavbar />
-      {/* Search */}
 
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex-shrink-0">
-        <div className="flex items-center justify-center gap-4">
-          <div className="relative w-[300px]">
+      {/* Search */}
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-3 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-4">
+          <div className="relative w-full sm:w-[300px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
 
             <input
@@ -273,41 +272,40 @@ export default function ProblemsMap() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            {filterCategories.map((filter) => {
-              const Icon = filter.icon;
+          <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 min-w-max pb-1 sm:pb-0">
+              {filterCategories.map((filter) => {
+                const Icon = filter.icon;
+                const isActive = activeFilter === filter.id;
 
-              const isActive = activeFilter === filter.id;
-
-              return (
-                <button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm transition ${
-                    isActive
-                      ? "bg-[#0a96f4] text-white"
-                      : "bg-white border border-gray-200 text-gray-600"
-                  }`}
-                >
-                  {Icon && <Icon className="w-4 h-4" />}
-
-                  {filter.label}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm whitespace-nowrap transition ${
+                      isActive
+                        ? "bg-[#0a96f4] text-white"
+                        : "bg-white border border-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {Icon && <Icon className="w-4 h-4" />}
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
       {/* MAP */}
-
       <div className="relative flex-1 w-full">
-        {" "}
         {loading && (
           <div className="absolute inset-0 z-[1001] bg-white/80 flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
           </div>
         )}
+
         <MapContainer
           center={mapCenter}
           zoom={14}
@@ -325,6 +323,7 @@ export default function ProblemsMap() {
 
           {filteredProblems.map((report) => {
             const descParts = formatDescriptionParts(report.description);
+
             return (
               <Marker
                 key={report.id}
@@ -348,7 +347,7 @@ export default function ProblemsMap() {
                             </p>
                           </div>
                         )}
-                        
+
                         {descParts.aiVision && (
                           <div className="rounded-lg border border-blue-100 bg-blue-50 p-2 mt-2">
                             <div className="flex items-center gap-1 mb-1">
@@ -364,7 +363,9 @@ export default function ProblemsMap() {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic mb-2 m-0">Нема опис.</p>
+                      <p className="text-sm text-gray-400 italic mb-2 m-0">
+                        Нема опис.
+                      </p>
                     )}
 
                     <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -396,14 +397,15 @@ export default function ProblemsMap() {
             );
           })}
         </MapContainer>
+
         {/* Legend */}
-        <div className="absolute bottom-6 left-6 z-[1000] bg-white rounded-2xl shadow-xl border border-gray-100 p-5 min-w-[200px]">
+        <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-[1000] bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-3 sm:p-5 min-w-[160px] sm:min-w-[200px] scale-90 sm:scale-100 origin-bottom-left">
+          {" "}
           <div className="flex items-center gap-2 mb-3">
             <Layers className="w-4 h-4 text-gray-500" />
 
             <h3 className="text-sm font-bold">Легенда</h3>
           </div>
-
           <div className="space-y-2">
             {legendItems.map((item, i) => (
               <div key={i} className="flex items-center gap-2">
