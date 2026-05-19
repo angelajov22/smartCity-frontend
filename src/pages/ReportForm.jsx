@@ -14,6 +14,7 @@ import {
   deleteReport,
   categoryMap,
   fileToDataUrl,
+  analyzeImage,
 } from "../api/apiService";
 
 const VALID_CATEGORIES = [
@@ -95,16 +96,6 @@ function ReportForm() {
     setDraftReportId(null);
   }
 
-  function extractAiDescription(fullDescription) {
-    if (!fullDescription) return "";
-    const patterns = ["AI vision:", "Визија на AI:"];
-    for (const p of patterns) {
-      const idx = fullDescription.indexOf(p);
-      if (idx !== -1) return fullDescription.slice(idx + p.length).trim();
-    }
-    return "";
-  }
-
   async function handleAnalyze() {
     if (!selectedFile) return;
 
@@ -114,45 +105,44 @@ function ReportForm() {
     setCategoryRejected(false);
 
     try {
-      const draft = await createReport({
-        description: description.trim() || "AI analysis request",
-        category: selectedCategory || "OTHER",
-        latitude: position.lat,
-        longitude: position.lng,
-        image: selectedFile,
-      });
+      const result = await analyzeImage(selectedFile);
 
-      setDraftReportId(draft.id);
+      const aiCategory = result.category?.toUpperCase() || null;
+      const aiDesc = result.description || "";
 
-      const aiCategory = draft.category?.toUpperCase() || null;
-      const aiDesc = extractAiDescription(draft.description);
-      const categoryLabel = categoryMap[aiCategory]?.label || draft.category || "Непозната";
+      const categoryLabel = categoryMap[aiCategory]?.label || aiCategory || "Непозната";
 
-      // The backend AI sometimes hallucinates valid categories (like TRAFFIC) for cartoons.
-      // We apply a frontend heuristic to block descriptions containing known irrelevant keywords.
       const irrelevantKeywords = [
-        "карактер", "сликар", "игра", "цртан", "анимаци", "марио", "пиксел",
-        "character", "painter", "game", "cartoon", "animation", "mario", "pixel", "филм", "глумец"
+        "карактер", "лик", "марио", "игра", "цртан", "анимаци", "сликар", "пиксел", "филм", "глумец",
+        "cartoon", "game", "animation", "character", "mario", "painter", "pixel", "movie", "actor"
       ];
-      
-      const isIrrelevant = irrelevantKeywords.some(kw => aiDesc.toLowerCase().includes(kw));
+
+      const isIrrelevant = irrelevantKeywords.some(kw =>
+        aiDesc.toLowerCase().includes(kw)
+      );
 
       if (!aiCategory || !VALID_CATEGORIES.includes(aiCategory) || isIrrelevant) {
         setCategoryRejected(true);
-        setAiResult({ 
-          aiDescription: isIrrelevant ? "Сликата не е препознаена како урбан проблем." : (aiDesc || "Не може да се анализира"), 
-          categoryLabel: isIrrelevant ? "Невалидна слика" : categoryLabel 
+        setAiResult({
+          aiDescription: isIrrelevant
+            ? "Сликата не е препознаена како урбан проблем."
+            : (aiDesc || "Не може да се анализира"),
+          categoryLabel: isIrrelevant ? "Невалидна слика" : categoryLabel
         });
-        try { await deleteReport(draft.id); } catch (_) {}
-        setDraftReportId(null);
         return;
       }
 
-      setAiResult({ aiDescription: aiDesc, categoryLabel, category: aiCategory });
+      setAiResult({
+        aiDescription: aiDesc,
+        categoryLabel,
+        category: aiCategory
+      });
+
       setSelectedCategory(aiCategory);
       if (aiDesc) setDescription(aiDesc);
+
     } catch (err) {
-      console.error("AI analysis error:", err.message);
+      console.error(err);
       setAiError(err.message);
     } finally {
       setAiAnalyzing(false);

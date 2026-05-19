@@ -95,17 +95,23 @@ export async function getUsers() {
   return apiFetch('/api/users')
 }
 
-const AI_API_BASE = 'https://tmilenkovski-smartcity-ai.hf.space'
+/**
+ * Analyze image using the backend's AI endpoint
+ */
+export async function analyzeImage(file) {
+  const formData = new FormData()
+  formData.append('image', file)
 
-export async function analyzeImageWithAI(imageDataUrl) {
-  const res = await fetch(`${AI_API_BASE}/generate-description`, {
+  const res = await fetch(`${API_BASE}/api/reports/ai-description`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageUrl: imageDataUrl }),
+    body: formData,
   })
+
   if (!res.ok) {
-    throw new Error(`AI analysis failed: ${res.status}`)
+    const text = await res.text().catch(() => '')
+    throw new Error(`AI analysis failed: ${text || res.status}`)
   }
+
   return res.json()
 }
 
