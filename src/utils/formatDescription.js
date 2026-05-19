@@ -25,7 +25,7 @@ export const formatDescriptionParts = (description) => {
   userPart = userPart
     .replace(/^Issue detected:\s*\w+\.\s*/i, "")
     .replace(/^User report:\s*/i, "")
-    .replace(/^Извештај на корисникот:\s*/i, "")
+    .replace(/^Извештај(от)? на корисникот:\s*/i, "")
     .trim();
 
   return {
