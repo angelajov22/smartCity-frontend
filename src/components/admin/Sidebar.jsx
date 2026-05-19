@@ -4,8 +4,8 @@ import {
   LayoutDashboard,
   Building2,
   Users,
-  Settings,
   AlertCircle,
+  Activity,
   LogIn,
   LogOut,
   Menu,
@@ -15,11 +15,11 @@ import logo from "../../assets/logo.png";
 import { useAuth } from "../../context/AuthContext";
 
 const menuItems = [
-  { path: "/admin", icon: LayoutDashboard, label: "Контролна табла" },
-  { path: "/admin/cases", icon: AlertCircle, label: "Преглед на случаи" },
+  { path: "/admin", icon: LayoutDashboard, label: "Аналитика" },
+  { path: "/admin/cases", icon: Activity, label: "Преглед на случаи" },
+  { path: "/admin/submissions", icon: AlertCircle, label: "Поднесувања" },
   { path: "/admin/institutions", icon: Building2, label: "Институции" },
-  { path: "/admin/users", icon: Users, label: "Корисници" },
-  { path: "/admin/settings", icon: Settings, label: "Подесувања" },
+  { path: "/admin/users", icon: Users, label: "Администратори" },
 ];
 
 const Sidebar = () => {

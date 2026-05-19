@@ -91,6 +91,10 @@ export async function getCategories() {
   return apiFetch('/api/reports/categories')
 }
 
+export async function getUsers() {
+  return apiFetch('/api/users')
+}
+
 const AI_API_BASE = 'https://tmilenkovski-smartcity-ai.hf.space'
 
 export async function analyzeImageWithAI(imageDataUrl) {

@@ -5,7 +5,6 @@ import {
   FileText,
   Users,
   MapPin,
-  Settings,
   Activity
 } from 'lucide-react'
 
@@ -13,11 +12,10 @@ const SidebarContext = createContext()
 export const useSidebar = () => useContext(SidebarContext)
 
 const sidebarItems = [
-  { icon: LayoutDashboard, label: 'Контролна табла', path: '/admin/dashboard' },
-  { icon: FileText, label: 'Преглед на случаи', path: '/admin/cases' },
-  { icon: Users, label: 'Корисници', path: '/admin/users' },
+  { icon: LayoutDashboard, label: 'Аналитика', path: '/admin/dashboard' },
+  { icon: FileText, label: 'Поднесувања', path: '/admin/cases' },
+  { icon: Users, label: 'Администратори', path: '/admin/users' },
   { icon: MapPin, label: 'Мапа на проблеми', path: '/admin/map' },
-  { icon: Settings, label: 'Поставки', path: '/admin/settings' },
 ]
 
 export default function AdminLayout() {

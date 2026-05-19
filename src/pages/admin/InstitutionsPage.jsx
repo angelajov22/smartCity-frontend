@@ -69,6 +69,36 @@ const InstitutionsPage = () => {
     }
   };
 
+  const handleExportCsv = () => {
+    if (institutions.length === 0) {
+      return;
+    }
+
+    const escapeValue = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const headers = ["ID", "Назив", "Категорија", "Опис", "URL"];
+    const rows = institutions.map((inst) => [
+      inst.id,
+      inst.name,
+      inst.category,
+      inst.description,
+      inst.url,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map(escapeValue).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `institutions-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     loadInstitutions();
   }, []);
@@ -154,7 +184,11 @@ const InstitutionsPage = () => {
               Филтер
             </button>
 
-            <button className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-[12px] sm:text-sm transition-all duration-200 hover:bg-gray-50 hover:border-gray-300">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-[12px] sm:text-sm transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+            >
               <Download size={15} />
               Експорт
             </button>

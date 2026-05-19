@@ -10,7 +10,7 @@ import DashboardHomePage from "./pages/admin/DashboardHomePage";
 import InstitutionsPage from "./pages/admin/InstitutionsPage";
 import AddInstitutionPage from "./pages/admin/AddInstitutionPage";
 import UsersPage from "./pages/admin/UsersPage";
-import SettingsPage from "./pages/admin/SettingsPage";
+import SubmissionsPage from "./pages/admin/SubmissionsPage";
 import LoginPage from "./pages/admin/LoginPage";
 import ProtectedRoute from "./pages/admin/ProtectedRoute";
 
@@ -40,6 +40,7 @@ function App() {
             <Route path="/admin" element={<DashboardLayout />}>
               <Route element={<ProtectedRoute />}>
                 <Route index element={<DashboardHomePage />} />
+                <Route path="submissions" element={<SubmissionsPage />} />
                 <Route path="cases" element={<AdminCases />} />
                 <Route path="institutions" element={<InstitutionsPage />} />
                 <Route
@@ -47,7 +48,6 @@ function App() {
                   element={<AddInstitutionPage />}
                 />
                 <Route path="users" element={<UsersPage />} />
-                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>
 
