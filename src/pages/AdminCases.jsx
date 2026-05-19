@@ -398,7 +398,7 @@ export default function AdminCases() {
                       onClick={exportToCSV}
                       className="text-[14px] font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm px-5 py-2.5"
                     >
-                      Извези (CSV)
+                      Export (CSV)
                     </button>
                   </div>
                 </div>
