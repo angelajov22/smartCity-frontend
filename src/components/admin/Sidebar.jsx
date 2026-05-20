@@ -17,7 +17,6 @@ import { useAuth } from "../../context/AuthContext";
 const menuItems = [
   { path: "/admin", icon: LayoutDashboard, label: "Аналитика" },
   { path: "/admin/cases", icon: Activity, label: "Преглед на случаи" },
-  { path: "/admin/submissions", icon: AlertCircle, label: "Поднесувања" },
   { path: "/admin/institutions", icon: Building2, label: "Институции" },
   { path: "/admin/users", icon: Users, label: "Администратори" },
 ];
@@ -169,18 +168,6 @@ const Sidebar = () => {
               Одјави се
             </button>
           )}
-
-          <button
-            onClick={closeMobileMenu}
-            className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5"
-            style={{
-              backgroundColor: "#0a96f4",
-              boxShadow: "0 4px 14px rgba(10, 150, 244, 0.35)",
-            }}
-          >
-            <AlertCircle size={18} />
-            Пријави проблем
-          </button>
         </div>
 
         <div style={{ height: 24 }}></div>
